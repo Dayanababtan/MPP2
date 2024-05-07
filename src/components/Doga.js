@@ -1,0 +1,39 @@
+const Dogs = [
+    {
+        id:"1",
+        Name:"Bruno",
+        Age:5
+    },
+    {
+        id:"2",
+        Name:"Aki",
+        Age:3
+    },
+    {
+        id:"3",
+        Name:"Tibi",
+        Age:2
+    },
+    {
+        id:"4",
+        Name:"Bucura",
+        Age:5
+    },
+    {
+        id:"5",
+        Name:"Lord",
+        Age:1
+    },
+    {
+        id:"6",
+        Name:"Oscara",
+        Age:2
+    },
+    {
+        id:"7",
+        Name:"Taciunel",
+        Age:12
+    }
+]
+
+export default Dogs;

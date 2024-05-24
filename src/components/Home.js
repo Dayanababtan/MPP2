@@ -8,8 +8,8 @@ import { Typography } from '@mui/material';
 function Home() {
     const [dog, setDog] = useState([]);
     const [human, setHuman] = useState([]);
-    const [error, setError] = useState(null); // New state variable to track errors
-
+    const [user, setUser] = useState([]);
+    const [error, setError] = useState(null); 
     let history = useNavigate();
 
     useEffect(() => {
@@ -43,6 +43,22 @@ function Home() {
             .catch(error => {
                 console.error("Error fetching human data", error);
                 setError("Failed to fetch human data. Please try again later.");
+            });
+
+            fetch('http://localhost:3001/user')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("HTTP error");
+                }
+                return response.json();
+            })
+            .then(data => {
+                setHuman(data);
+                setError(null);
+            })
+            .catch(error => {
+                console.error("Error fetching user data", error);
+                setError("Failed to fetch user data. Please try again later.");
             });
     }, []);
 
@@ -149,6 +165,7 @@ function Home() {
                 </Typography>
             )}
             {!error && (
+                
                 <div style={{ margin: "10rem" }} >
                    <Table stripped bordered hover size="sm">
                         <thead>
@@ -208,7 +225,6 @@ function Home() {
                             <option value="15">15 per page</option>
                         </select>
                     </div>
-                    
                     <br></br>
                     <Link className='d-grid gap-2' to="/create">
                         <Button size="lg">Create</Button>

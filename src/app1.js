@@ -3,9 +3,10 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const { MongoClient, ObjectId } = require('mongodb');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-// Import the MongoDB Node.js Driver
-const { MongoClient } = require('mongodb');
 
 // Connection URI for MongoDB Atlas
 const uri = 'mongodb+srv://babtandayana2:fgqitiace2UlTxxP@cluster0.w7qgva7.mongodb.net/';
@@ -23,11 +24,28 @@ async function connectToDatabase() {
     } 
 }
 
+
+// Auth Middleware
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+};
+
 connectToDatabase();
+
+
 
 // Import your routers
 const dogRoutes = require('./dog');
 const humanRoutes = require('./human');
+const userRoutes = require('./user');
 
 // Middleware
 app.use(morgan("dev"));
@@ -35,10 +53,19 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cors());
 
-// Use your routers
-app.use('/dog', dogRoutes);
-app.use('/human', humanRoutes);
 
+
+const JWT_SECRET = 'your_jwt_secret_key';
+
+
+
+
+app.use('/human',authenticateToken , humanRoutes);
+app.use('/user', userRoutes);
+
+
+
+app.use('/dog', dogRoutes);
 // Error handling middleware
 app.use((req,res,next) => {
     const error = new Error('Not found');

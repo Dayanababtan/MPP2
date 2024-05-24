@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { MongoClient } = require('mongodb');
-const faker = require('faker');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const uri = 'mongodb+srv://babtandayana2:fgqitiace2UlTxxP@cluster0.w7qgva7.mongodb.net/';
 const JWT_SECRET = 'your_jwt_secret_key';
@@ -18,6 +19,36 @@ async function connectToDatabase() {
     }
 }
 
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const db = await connectToDatabase();
+        const user = await db.collection('users').findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        
+
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token });
+    } catch (error) {
+        res.status(500).json({ error: error.toString() });
+    }
+});
+
+// Route to get all users (for testing purposes)
+router.get('/', async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        const users = await db.collection('users').find({}).toArray();
+        res.status(200).json(users);
+    } catch (err) {
+        console.error('Error fetching users from database', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Middleware for authenticating token
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -30,34 +61,5 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-
-// Route to get all dogs from the database
-router.get('/',  async (req, res, next) => {
-    try {
-        const db = await connectToDatabase();
-        const dogs = await db.collection('dogs').find({}).toArray();
-        res.status(200).json(dogs);
-    } catch (err) {
-        console.error('Error fetching dogs from database', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Route to add a dog to the database
-router.post('/', authenticateToken, async (req, res, next) => {
-    try {
-        const db = await connectToDatabase();
-        const dog = {
-            name: req.body.name,
-            breed: req.body.breed,
-            age: req.body.age,
-        };
-        await db.collection('dogs').insertOne(dog);
-        res.status(200).json({ message: 'Dog added successfully' });
-    } catch (err) {
-        console.error('Error adding dog to database', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
 
 module.exports = router;

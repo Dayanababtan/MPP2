@@ -55,7 +55,7 @@ function Add() {
                         required
                     />
                 </Form.Group>
-                <Button onClick={(e) => handleSubmit(e)} type="submit">Submit</Button>
+                <Button onClick={(e) => handleSubmit(e)} to="/home">Submit</Button>
             </Form>
         </div>
     );
